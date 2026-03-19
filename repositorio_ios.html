@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Repositorio Normatividad - MSPAS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --primary: #192854; --accent: #4eb4e1; --bg: #f4f9ff; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: var(--primary); }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 40px; }
+        .main-logo { width: 180px; margin-bottom: 15px; }
+        header h1 { font-size: 28px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .search-box { position: relative; max-width: 600px; margin: 0 auto 50px; }
+        .search-box input { width: 100%; padding: 15px 55px; border-radius: 35px; border: 2px solid #ddd; outline: none; font-size: 16px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .search-box i { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.05); transition: 0.3s; cursor: pointer; border: 1px solid #eee; display: flex; flex-direction: column; justify-content: space-between; height: 340px; }
+        .card:hover { transform: translateY(-10px); border-color: var(--accent); }
+        .icon-wrapper { height: 160px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+        .icon-wrapper img { max-width: 90%; max-height: 90%; object-fit: contain; }
+        .card h3 { font-size: 14px; font-weight: 700; margin: 10px 0; line-height: 1.3; }
+        .btn-view { background: #f0f7ff; color: var(--primary); padding: 8px; border-radius: 10px; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-top: auto; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); overflow-y: scroll; -webkit-overflow-scrolling: touch; }
+        .modal-content { background: white; margin: 2% auto; padding: 40px; width: 90%; max-width: 1100px; border-radius: 25px; position: relative; }
+        .close { position: absolute; right: 25px; top: 15px; font-size: 35px; cursor: pointer; }
+        .landing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; margin-top: 30px; }
+        .doc-item { background: #fff; border-radius: 15px; border: 1px solid #eee; padding: 15px; text-align: center; }
+        .doc-cover-box { width: 100%; height: 250px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; background: #f9f9f9; border-radius: 8px; overflow: hidden; }
+        .doc-cover-box img { max-width: 100%; max-height: 100%; object-fit: cover; }
+        .doc-title { font-size: 12px; font-weight: 700; min-height: 40px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; color: #333; }
+        .btn-pdf { display: block; background: var(--primary); color: white; padding: 10px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: bold; }
+
+        /* ── Mejoras móvil / iOS ── */
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            header h1 { font-size: 18px; }
+            .main-logo { width: 120px; }
+            .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+            .card { height: auto; min-height: 260px; padding: 14px; }
+            .icon-wrapper { height: 110px; }
+            .modal-content { padding: 20px 15px; width: 95%; margin: 5% auto; }
+            .landing-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+            .doc-cover-box { height: 180px; }
+            .close { font-size: 28px; right: 15px; top: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <img src="https://drive.google.com/thumbnail?id=1i93EEnIq4tZbxpHCOUnhmFha3MWwFM0N&sz=w500" alt="Logo MSPAS" class="main-logo">
+        <h1>Dirección de Normatividad de Programas de Atención a las Personas</h1>
+    </header>
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Buscar por programa o tema..." onkeyup="filterPrograms()">
+    </div>
+    <div id="programGrid" class="grid"></div>
+</div>
+
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle" style="border-bottom: 3px solid var(--accent); padding-bottom: 10px; margin-bottom: 20px;"></h2>
+        <div id="landingContent" class="landing-grid"></div>
+    </div>
+</div>
+
+<script>
+    const data = [
+        { 
+            name: "1. Programa de Discapacidad", 
+            id: "1padR_zkCEw0pKKQIdrv-5g02-VmAUyR7",
+            docs: [
+                { t: "Normas nacionales de salud ocular para I y II Nivel", img: "1PkYOiKbe3T-AasA02J3xJeu-ha_n8s3a", pdf: "1NBpNa9SmCvjE8XVv4r6rASJBacOn-gQn" },
+                { t: "Autocuidado de personas mayores para prevención de discapacidad", img: "108md4QoIA5_sGZSSb42dmACfPR7WZTgs", pdf: "1Gqp79b8nFhtRraDn2PE7KdvrstRkWDSM" },
+                { t: "Tipos de discapacidad", img: "10S7hhQUijfsco5NvzeKr1gynhbUdW9lD", pdf: "10S7hhQUijfsco5NvzeKr1gynhbUdW9lD" },
+                { t: "Prevención COVID19 - Discapacidad física", img: "1NOHvC0rzGt8Go4VFQ5zkFcFeXIfDdQoi",  pdf: "1NOHvC0rzGt8Go4VFQ5zkFcFeXIfDdQoi" },
+                { t: "Prevención COVID19 - Discapacidad visual", img: "1z791thLiATO7NnHg5SkgWZ0VoIJBGPsR", pdf: "1g0y-6Hq-dZeRTeaqFhy0rmf_GCrIpoiy" },
+                { t: "Prevención COVID19 - Discapacidad auditiva", img: "16KtXlWtwKpKJBOxs6tr-xajjdosTsoFU", pdf: "16KtXlWtwKpKJBOxs6tr-xajjdosTsoFU" },
+                { t: "Prevención COVID19 - Discapacidad intelectual o psicosocial", img: "1s9NDgrQMRsz2TKXM8PeOSAvy6VFE2hix", pdf: "1s9NDgrQMRsz2TKXM8PeOSAvy6VFE2hix" },
+                { t: "Tarjeta triquiasis tracomatosa", img: "1aGtimtF9Xd5Ki-NcakZshV65Wmyjixuw", pdf: "1aGtimtF9Xd5Ki-NcakZshV65Wmyjixuw" },
+                { t: "Que es el tracoma", img: "1GX6W4b-BzgnjlhQBDcdDiea497YQ4lNp", pdf: "13E94cGjXGOImG0TgnZydX3Aqq3_wfEoE" },
+                { t: "Dosificación de antibióticos tetraciclina y zitromicina", img: "155j22alDxggXPTvbRaZD6TSfW8_ffPU_", pdf: "1pK9fQmC9-R12gNWk1N_j_RRvAqrA_9hc" },
+                { t: "Aguadeza visual letras", img: "1a05H2LGnGOKgYcrsiCtG_QWi42rWuC1l", pdf: "1lcskSWfMFLNbPXQdo80dTgp7MepH0kKy" },
+                { t: "Aguadeza visual números",img: "1a05H2LGnGOKgYcrsiCtG_QWi42rWuC1l", pdf: "1pK9fQmC9-R12gNWk1N_j_RRvAqrA_9hc" },
+                { t: "Tallimetro", img: "1uzvFWJ2ByVrlihIeZMsdMQ8kggg0YbLV", pdf: "14RxaFNPBnfE6ymteLMpvhPHEUCf7kMIf" },
+                { t: "Acciones para prevenir COVID  en sordoseguera", img: "1B2PckP3rkfqNagew7jOJ-NyXnhCdMJks", pdf: "1pvoS7eXXLG6R6FWqHiTXW-QpI7sbSWD5" },
+                { t: "Dosificación de antibióticos", img:"155j22alDxggXPTvbRaZD6TSfW8_ffPU_", pdf: "1w2jnBKDiPa4rG1nPqVY_ziaW_vYmYfQD" },
+            ]
+        },
+        { 
+            name: "2. Programa de Enfermedades Transmitidas por Agua y Alimentos", 
+            id: "1YiGo5RAnKesO6pxdem6NB2TsxCUfhjHG", 
+            docs: [
+                { t: "Lineamientos técnicos campaña nacional desparasitación (6 a 14 años)", img: "1NbDKH4vCTe4FK2Q32rbLIvFX_12GaR7k", pdf: "1wuWyA4KS5wpfL0J8R7dG3Go4ZoT0tF0z" },
+                { t: "Conociendo la fiebre tifoidea", img: "1GQQLla2j7xsV4vw5RA4Lm2qjLUoPPLTr", pdf: "1xXtKRb_B4OyFqvV8qb5NMoAbv7SUnLQi" },
+                { t: "Reglas de oro", img: "13vYBBHWzXszCWEiMju9bU9YeuI1UPv8R", pdf: "1pwJHGk9IuBAkfJ0Z9fBQUgQhs4_lUQyw" }
+            ]
+        },
+        { 
+            name: "3.  Programa de Atención a la Población Migrante", 
+            id: "1RMePna2pJm5RKIxVLY0QYkALLll_5t7v", 
+            docs: [
+                { t: "Lineamientos generales de salud caravana migrante (Pandemia)", img: "1qSAD3S016p-3felC5XsqTqOcUDSp80qP", pdf: "16pxDyyYlTRFCgZ5KL2YbJrcB232Zrby1" },
+                { t: "Lineamientos técnicos atención en salud caravana migrante", img: "1zSQ0bWJ_D54xgtCuejqf89vNRaHh9qw-", pdf: "1B5yf5vvs1jHreH-sx1GAr_hDvZeHJwXn" },
+                { t: "Lineamientos técnicos promoción y prevención efectos adversos", img: "1CrMteiy0dxlrpACVxrUt3Fr4vW8ZarWb", pdf: "1mVBEhDfTDv74SwiUu0b-Iy9ps5WamoFr" },
+                { t: "Infografía migrante", img: "1puN6-JKvsrmthnrgarkqcg8SUTytGLTF", pdf: "1iBvdav1fyHpeHMzHVaNE3kU6ZVWxlyPG" },
+                { t: "Guía de abordaje integral de salud mental", img: "1-wEc1GO830PUHyunIz_xyrIRYmlgcCmB", pdf: "1R7saBd-VosKcISj3lnJcTAeGbe2c5u9I" },
+                { t: "Migrante información", img: "1wOZz5fJlKzJc61k052bAfM_TfTYyV1if", pdf: "1wOZz5fJlKzJc61k052bAfM_TfTYyV1if" }
+            ] 
+        },
+        { 
+            name: "4. Programa de Salud Integral de la Niñez ", 
+            id: "1lHe65LIhWRALy8qz633gxNP1rKm87BDU", 
+            docs: [
+                { t: "Protocolo de salud y trabajo infantil", img: "1MJZ9q3ofeags_rwaChLCyd2hzeRHWTiR", pdf: "1xnJfQJ6DHz6yQET0gmPGE5j7H55gzu4x" },
+                { t: "Cuento Fausto", img: "1qi8kWH4w_hUpRLguP8zyuvuZgxgy2JhR", pdf: "1IfeVsszfmCQdNgu1Fk8WxQ2BpbnTYCw5" },
+                { t: "Memoria final Fausto", img: "1LqFnQuzerBqA7kJS3VdyiC3YdYNgqUmj", pdf: "19mu9lfP7e48jeHQyTFxoVdzlMUO1gxPF" },
+                { t: "Recetario final", img: "1FR8Ed5pSkazNprHjwSvr9HkPP3VZL4vv", pdf: "1-kvdBehDqOpVx4PON__OgaGNhHzc5ePC" },
+                { t: "Afiche denuncia maltrato infantil", img: "1pe9f11qW9lLcertCuwm6K9JykdMz3lDi", pdf: "1pe9f11qW9lLcertCuwm6K9JykdMz3lDi"},
+                { t: "Juntos contra el trabajo infantil y adolescente ", img: "1pe9f11qW9lLcertCuwm6K9JykdMz3lDi", pdf: "1x1pTfF9q3p2n7t0r1s2q3p4o5n6m7l8k" },
+                { t: "Signos y sintomas de peligro durante la infancia", img: "1Nb2V04ervII-RNtKHx4X1wWA7tSm54Ps", pdf: "1WdbcV0VvvbxbWvP5-lHszmxpvHX9fKDs" },
+                { t: "Alimentación en la primera infancia durante el COVID", img: "1eCzgKPTpmd0KIfx85_RqAMXw1Ejjo21c", pdf: "1F5YnP1DJBwFuofAlHzCenTeqWz4M-jbk" },
+                { t: "Compendio de juegos ", img: "1s9ngO2TQXxa0aYE20oX95fRccnkqUKWH", pdf: "1EyvFn9zN7EkLUnZKELPEP1iXuJNjpUR2" },
+                { t: "Juegos de mesa", img: "1B3yC_ktig2LBuPyL9TOCehtt15MXdFm5", pdf: "1rNWxhUHqFl03T8F9q4zGUkbqgYlkGJRp" },
+                { t: "Las mini aventuras de Fausto", img: "1qi8kWH4w_hUpRLguP8zyuvuZgxgy2JhR", pdf: "1IfeVsszfmCQdNgu1Fk8WxQ2BpbnTYCw5" },
+                { t: "Desplegable niñez", img: "1SxMoqnANuzQXY4b-ZJzepfEoI82h62fS", pdf: "1SxMoqnANuzQXY4b-ZJzepfEoI82h62fS" },
+                { t: "Cuento Nino y la gran roca", img: "17YEFpJ9eDFouRH2BEOnf80u2v_rT1ZIh", pdf: "1vljNX3YVCmQBR9bZXtrIZCOLuBoC2gi9" },
+            ] 
+        },
+        { 
+            name: "5. Programa de Adolescencia", 
+            id: "1bCaUIgKiROHSJlqK519vAio3oi17gTJZ", 
+            docs: [
+                { t: "Estándares de calidad adolescentes", img: "1c_TQ0LZNQv4-Y2hc4iKZsEymyN1If2Q9", pdf: "1Sk3wetat1WyR4gseDtK1GcXxoZr7JUMW" },
+                { t: "Manual de técnicas participativas", img: "1c_TQ0LZNQv4-Y2hc4iKZsEymyN1If2Q9", pdf: "1UI5QeZDv9h9GOrG0DEenpQEqB6GMfJkj" },
+                { t: "Hábitos del buen sueño (Infografía)", img: "1IHRmahgdvJO4yK76EGqi8CNem81uIE4_", pdf: "1IHRmahgdvJO4yK76EGqi8CNem81uIE4_" },
+                { t: "Protege a tus hijas e hijos", img: "1VAKXQ0Ew83EKYgEtP0GaKHkzI3l6kCOI", pdf: "1gs0HOjhKZM5sL7Wq6W7Ui4LApbCmPTBw" },
+                { t: "Clínicas de atención integral", img: "1r3uop414vlFz2jcAldSD8jRCmjww-LC0", pdf: "1EatCoDqlWK-B9YUaS4XvKzB8IlpOZ92V" },
+                { t: "Juntos contra el trabajo infantil", img: "1Or3ATQ8b3_gqjJufZ0kCTPkiag6eyx2R", pdf: "14mNE2LMzZO6eVmtoxu8C2fjrYa-4G4qb" },
+                { t: "Previniendo las adicciones", img: "1MP2t1nh8Lxy7AJS1RF03CRUWD1fPRSsO", pdf: "1wNMygKWVfnpQc8GM3pEXm2pMQGYA9QVI" },
+                { t: "Mi proyecto de vida", img: "1tuNAA0iwfP_7hcB0sjjhtDvzZpeTVZUD", pdf: "17b1hZ4O4a56RSDv0SoMPm_J-01HDuwQe" },
+                { t: "Recomendaciones pandemia (Jóvenes)", img: "1kcYXNrh_gR6j3Ty9WI6NDyksaG_PY9Kj", pdf: "1nREQdLdBW7DUC5Zp70NA3Jl57q2hGV2j" },
+                { t: "Violencia intrafamiliar", img: "1PArd_CqV84pQr43cvThx1GGetQPQSKlC", pdf: "10CISPjrZRXgc7EnAgrqREC8tPAoToDS7" },
+                { t: "Prevención accidentes motocicletas", img: "1MrUB16ppeBRLb7es2dV4doaP8vnCZT0w", pdf: "1wUc8yAuneWehW4o9hzexGBcncVihKdzM" },
+                { t: "Guía de bolsillo para adolescentes", img: "1bj4RTzrR87tygcwiQb9FPTSuyXt2gilp", pdf: "1_j8ZF4tYZrTKNXyCGS_U4F5a1PQ8wB511" },
+                { t: "Lineamientos de atención diferenciada para adolescentes", img: "1woQeuTCisHzGzNJCsRDsBMXGs5eRNxO-", pdf: "1eW21tlBChNPJL1705uTl9V42WTaJq2pA" },
+            ] 
+        },
+        { 
+            name: "6. Programa del Adulto Mayor", 
+            id: "1QdXlnpJ9VGP5nUA4l-1jfkjrkWczvKmO", 
+            docs: [
+                { t: "Evitemos las caídas en la persona mayor", img: "1CI5E9Odrft0kY7HAgDiWq_xVBwx5NobF", pdf: "1CI5E9Odrft0kY7HAgDiWq_xVBwx5NobF" },
+                { t: "Normas de atención en salud módulo adulto", img: "18PZHozVh2SOSS_KYaIbP1Ey6kD7-k1Fo", pdf: "1fEfX3-fkh_6kyULZa-nGkL5PYWtN9r7I" },
+                { t: "Módulo persona adulto mayor", img: "1S_ztvhdWDUrUv8JtixXnouvX0h6Yjk5k", pdf: "1coDZ0c-Ed9brfPew_9TcMaSgEKR12CJo" },
+                { t: "Sugerencias para cuidadores de personas mayores", img: "1Gqu2sV2DQVYGCbqzsTggxxO-FqaGowXI", pdf: "1QAUlj3o4ClYKPHxTEXbfjySZk124j66m" },
+                { t: "Precaución al caminar", img: "1QXn-AzpTlpD4rnUMA7zlEngrG9a3xBMd", pdf: "1QXn-AzpTlpD4rnUMA7zlEngrG9a3xBMd" },
+            ] 
+        },
+        { 
+            name: "7. Programa de Salud Bucodental", 
+            id: "18m0Ohc7-Lo9p2sF2RI1dnDORBCNCDPWq", 
+            docs: [
+                { t: "Protocolo de bioseguridad odontológica COVID-19", img: "1nuBTA0Q4wy9IlzO02TBoQT4Pmd101255", pdf: "1bO2FJeKIUe0m5U8L0tplP0mSH4TbLFh3" },
+                { t: "Guía de exámen clínico estomatológico", img: "1GzEgIkwfxR6yg_QU869kfMJYcnj5pGR0", pdf: "1lBLPyTI0XV2YQ4fxEWkPVzvjyqoyieYh" },
+                { t: "Cuidado dental y prevención de caries", img: "1eC7I22ZIMt3pev_UqVzu-b5Qr9-tucVs", pdf: "1JouvTE6SdreZ7Nh35o_8OIZq9knZyAEV" },
+                { t: "El flúor ayuda a proteger tus dientes", img: "1YJP3mw72ff3pJGiNQ2RVuvqQLTqSrGkN", pdf: "1SrfzaivAiSozbYBiHYz11OhirQm83EuD" },
+                { t: "Soy el campeón del cepillado dental", img: "16CHQiH4EfQfZulHQUoynIlyPdv1NBTgH", pdf: "1iv2fxPyOfWEyUuSxNLa2REvnbJ3Za8aU" },
+                { t: "Cómo prevenir la caries dental", img: "1ILkkB2pZzYo5UJkQoJVeK8Lb3xNNDzJC", pdf: "1X8p6_p8n9V_R7Iq6tYn5N8z7g9t1X05L" },
+                { t: "Guía para pacientes con pulpitis", img: "1KgAgkbMQLGNSHgh80yrGn5v7YtNaLrDi", pdf: "1zxPkgu5eGHf2W4OsRpZ3ZSn1fS58tLNG" }
+            ] 
+        },
+        { 
+            name: "8.Programa de Infecciones Respiratorias Agudas", 
+            id: "1y7VIfDNrDqZbQhFHQBJIJvXwA2XLmJ4F", 
+            docs: [
+                { t: "Boletín informativo infecciones respiratorias", img: "18eA_LxruNFi_9-ym9TsziLFsUH8Fg7wO", pdf: "15PE33kvel7XFx30rIHyP88G6EI4a4UzU" },
+                { t: "Guía de tratamiento domiciliar COVID", img: "1QLmG2S2T_5mKiMoeGI_PrYpAGqdrWYuA", pdf: "1eXYnCnrM-W84PehDszj3Fplfejv7Fwvh" },
+                { t: "Síndrome post COVID", img: "1yHL3FJyEbTEX4p-0kq-pktN6jCQ1GQN7", pdf: "1pHYX4rM9mhztR7Lo6sOcxnKgqSaPG6Gt" },
+                { t: "Abordaje de casos sospechosos COVID-19", img: "1ea7drfbl6CM4OVRR4z3iuRrMICHRMw_6", pdf: "1Y3LsB2cGFYajQexqlFICVyBdPzFi_2YV" },
+                { t: "Zinc como coadyuvante en neumonía", img: "1MpPUjhKCbS0XgmwCLGxXzXTpZcM_UadA", pdf: "1JhkzAd9-649CZUs5lNJiu2MI9cyGcM5L" },
+                { t: "Prevención de la otitis media", img: "1B2ombzqSFjjP7OiEgGJgaV3ZXt_SskSE", pdf: "14FPhQiXFbuQI2tIVmB4ZKLf74wn8F7cK" },
+                { t: "¿Cómo prevenir la neumonía?", img: "1KspOmoBH5f5sy_xyYwxY9MiIqCmFgYtY", pdf: "1xzZcq_r6Gd99knsoPzX2JqDe_XGzKQmq" },
+                { t: "Infecciones respiratorias prevención", img: "1eN2r5XjMq8z2lov-4rRGL_jZgrlh9m87", pdf: "1Yi6qXinOYLCbIP3dlna4qMGUPiwcswGP" },
+                { t: "Efectos negativos del humo de leña", img: "1SP0fz4VuUg0gG18PXQ4J4c3eWNN5LtHq", pdf: "15PE33kvel7XFx30rIHyP88G6EI4a4UzU" },
+                { t: " Influenza", img: "1yUQwAPuR77DYXbat6QHkD7qcsApj2YoA", pdf: "1E4n7--z9Dh_8Q_zPq_MT-5cqLt1uCPhd" },
+                { t: "Infecciones respiratorias agudas", img: "1GCIP96okmnV5Hw5vZP9gRKp3ZM_dfru2", pdf: "19caagoLdh6LYMEL2i3nD1R5w5vErm1Or" },
+                { t: "Amigdalitis", img: "1tw2Q7-IPBduteOtFcL5ZFLAq4DSVmZBE", pdf: "1jmGu7Qaq0gzErCnMBGzyJDyEkVsskcUh" }
+            ] 
+        },
+        { 
+            name: "9. Programa de Salud Laboral", 
+            id: "1B72UjuvcdrSh6wtVscI0sxkRMQWXaKPv", 
+            docs: [
+                { t: "Inclusión laboral para personas con discapacidad", img: "1LU6cLQRGgkJDfGAlu-DEr99uQCm5xKzH", pdf: "1LU6cLQRGgkJDfGAlu-DEr99uQCm5xKzH" },
+                { t: "Prevención de riesgo laboral", img: "13vZOsWOExMThu_qeo7y9RyEMTMvlTx81", pdf: "13vZOsWOExMThu_qeo7y9RyEMTMvlTx81" },
+                { t: "¿Qué es el riesgo laboral?", img: "1U4-2LQ6iJr9klGY0OlGto6TIL4x9EagW", pdf: "1U4-2LQ6iJr9klGY0OlGto6TIL4x9EagW" },
+                { t: "Ergonomía en el trabajo desde casa", img: "1JgVfOrfsVbDLlyR_tBeXc8UX6LpzRBXu", pdf: "1JgVfOrfsVbDLlyR_tBeXc8UX6LpzRBXu" },
+                { t: "Postura adecuada embarazada (Oficina)", img: "1sfp0BQc-tdr_dEVY7z2FcPsaywdzGcsa", pdf: "1sfp0BQc-tdr_dEVY7z2FcPsaywdzGcsa" },
+                { t: "Cuidar de la salud mental", img: "1Ghg83ZjCOH5c826aYAu2VxdJLiDRsWtz", pdf: "1Ghg83ZjCOH5c826aYAu2VxdJLiDRsWtz" },
+                { t: "Ojo seco", img: "1GTWbvu8yeH7VZSostSAhnNQQRNLGY2ij", pdf: "1GTWbvu8yeH7VZSostSAhnNQQRNLGY2ij" },
+                { t: "Tunel carpiano", img: "11zDVq5HLTjyg8ebaT0PGsg6Pa3qONvDs", pdf: "11zDVq5HLTjyg8ebaT0PGsg6Pa3qONvDs" },
+                { t: "Seguridad en el trabajo ", img: "1TuAwECaTnqpkrgMvtcwM7F9cxyXT5VHD", pdf: "1TuAwECaTnqpkrgMvtcwM7F9cxyXT5VHD" }
+            ] 
+        },
+        { 
+            name: "10. Programa de Salud Mental", 
+            id: "1vtRKpSs46LwU3qaGp5K4cFk0ynRnOTmR", 
+            docs: [
+                { t: "Estimulación oportuna", img: "1mqN8-qTVsukEUN02H50RqyrutIlRUTKL", pdf: "1mqN8-qTVsukEUN02H50RqyrutIlRUTKL" },
+                { t: "Atención a problemas frecuentes de salud mental", img: "1vu7uJumRbyBgPNcuwmN8_xAmbP8wqg6Y", pdf: "1v0aYlMuLYMpsigNnD2ae0mpwVv6UXZsU" },
+                { t: "Asistencia a víctimas de trata de personas", img: "1Pa-6YQsc9-CdUb32ZTQsGIw07lT4XdOF", pdf: "1r4k-F3UfTya0K8tNih_9_fhNFI4tg5bf" },
+                { t: "Salud mental en situación de emergencias", img: "11_nRPLJdKhq0amNut-XXQBWEAmCACUhx", pdf: "14Iy4i5rT5tJatmi50s8u3zSLjPeglcMQ" },
+                { t: "Política institucional de salud mental", img: "1ibNlscGHWkQGqcsXnsXw_Ztyk-ZeHzCr", pdf: "1aFYMtPJZ6i_YiArcCqKEtNPkXET88jT1" },
+                { t: "Manual prevención del consumo de alcohol", img: "14rpDoRDxWtNlRiibVkASIkSppoFGMIRJ", pdf: "1nLVdr2qr7J-sUKGFhW9_djQE2vZxpXN0" },
+                { t: "Prevención del suicidio", img: "1D0ZKZTTL42R1e4eF47lNGJjCrAeqWjAX", pdf: "14rpDoRDxWtNlRiibVkASIkSppoFGMIRJ" },
+                { t: "Cuidado de la salud mental en el personal", img: "1-wEc1GO830PUHyunIz_xyrIRYmlgcCmB", pdf: "1R7saBd-VosKcISj3lnJcTAeGbe2c5u9I" }
+            ] 
+        },
+        { 
+            name: "11. Seguridad Alimentaria", 
+            id: "1F9GxQbKNVxYYoC3tEU0jpe7E2GmSasIL", 
+            docs: [
+                { t: "Alimentación a niños y niñas (Guía 1)", img: "1JJgynWUbTmfO2WuCjKwrQYcMjrrsJ4GX", pdf: "1JJgynWUbTmfO2WuCjKwrQYcMjrrsJ4GX" },
+                { t: "Alimentación a niños y niñas (Guía 2)", img: "10GwY5YciieLJ4O2xneHGjYkXkZkckQBg", pdf: "10GwY5YciieLJ4O2xneHGjYkXkZkckQBg" },
+                { t: "Alimentación a niños y niñas (Guía 3)", img: "1SZQ_YtZIHvKaMQu0qv3wQsballbNLVac", pdf: "1SZQ_YtZIHvKaMQu0qv3wQsballbNLVac" },
+                { t: "Alimentación a niños y niñas (Guía 4)", img: "1obDkTK-wRkMI5QNh4y0luWSzfFGG31xc", pdf: "1obDkTK-wRkMI5QNh4y0luWSzfFGG31xc" },
+                { t: "Proteger la lactancia materna", img: "1U8mF1Kul9WyRnH6FRtFAV91-fr0qUSg9", pdf: "1U8mF1Kul9WyRnH6FRtFAV91-fr0qUSg9" },
+                { t: "Lactancia materna (Guía Informativa)", img: "1wfuQsSzS4RBxctGp6xEzacZxn2ycr0-F", pdf: "1wfuQsSzS4RBxctGp6xEzacZxn2ycr0-F" },
+                { t: "Suplementación con micronutrientes a embarazadas  ", img: "1Lvl66bvtSnutD7-8qXSgOYzklKSTIhBH", pdf: "12PjnveqcsCxr1lFTBIaA15a8NB_ALEry" },
+                { t: "Alimento fortificado complementario",img:"13tb7ISOtFCLi-EDAFcD3Ce17U7tl_vPh",pdf: "1PWlEwUZulgwaokYmvKpZXJicWjL4kSea" },
+                { t: "Manual para fortalecer la promoción de la lactancia", img: "1VwjjeOHiQr_aoP9ROUO0XcM2taIffFxR", pdf: "1L-CmRkjGn3Q5Rr3dU7rOdP8b1jSZF6kD" },
+                { t: "Manual para fortalecer la Promoción de la lactancia", img: "1VwjjeOHiQr_aoP9ROUO0XcM2taIffFxR", pdf: "1L-CmRkjGn3Q5Rr3dU7rOdP8b1jSZF6kD" },
+                { t: "Manual técnico de monitoreo, control  y promocion del crecimiento", img: "11surb5mV6dPIVgdaZy4l_p6CtPhWZd20", pdf: "16hH7gjsn11GwB5xb4VIaS5S4MHPpUDeM" }
+            ] 
+        },
+        { 
+            name: "12. Programa de Medicina Transfusional y Bancos de Sangre", 
+            id: "1YJv05xoTo-17R2RtmQC8thrVTwlUcDKn", 
+            docs: [
+                { t: "Soy voluntario (juego didáctico)", img: "1yYsv4aPgS2-2-75AoJX5tNjn_m2KQGxb", pdf: "1yYsv4aPgS2-2-75AoJX5tNjn_m2KQGxb" },
+                { t: "Trifoliar donación (Lado A)", img: "1hJikRAp-2cX8wDERt5V6K4PBi-BBDMrZ", pdf: "1hJikRAp-2cX8wDERt5V6K4PBi-BBDMrZ" },
+                { t: "Soy voluntario que dona", img: "1USMsztzoLvoY-jn1gtpCIzjeWSs4Z5UB", pdf: "1USMsztzoLvoY-jn1gtpCIzjeWSs4Z5UB" },
+                { t: "Volante donación 1", img: "1X-wvAGbpFZARso7zVLjrgMSsCmcAnPwC", pdf: "1X-wvAGbpFZARso7zVLjrgMSsCmcAnPwC" },
+                { t: "Volante donación 2", img: "13FtHo2zX1iwxEOZrl_D2vFSh85gEhiib", pdf: "13FtHo2zX1iwxEOZrl_D2vFSh85gEhiib" },
+                { t: "Colecta móvil de donación", img: "1DL1m4RSMlRQhiQK8H2eUbI7unPFKW8dg", pdf: "1DL1m4RSMlRQhiQK8H2eUbI7unPFKW8dg" },
+                { t: "Héroes", img: "10xfCcakulhS6lX8XbzMPSEWm1tv9zFWb", pdf: "10xfCcakulhS6lX8XbzMPSEWm1tv9zFWb" },
+                { t: "Buscando a mi héroe", img: "13jP6ZfnO2nggSSUmEKnbdS-I563GMdYg", pdf: "13jP6ZfnO2nggSSUmEKnbdS-I563GMdYg" },
+                { t: "tu donación salva tres vidas", img: "1mKnTLtKVZD61HLmrcqsjDTDp8A8jGkRl", pdf: "1Kp3zPEDj4glgIM72BaG4krVRHSh8Vrbg" },
+                { t: "Buscando a mi héroe preguntas frecuentes", img: "1MGpoDi2nedzb-ZBvEgMzA8PchQY-9iMz", img: "1MGpoDi2nedzb-ZBvEgMzA8PchQY-9iMz"},
+                { t: "Cuidando a nuestros héroes", img: "1IMGXc4Vv3X1fVmnUVzR7ziExvxIzrE7M", img: "1IMGXc4Vv3X1fVmnUVzR7ziExvxIzrE7M" },
+                { t: "Recomendaciones para la donación", img: "1YUj9LyMGpZ3WQ8m_B3iC3GLO1PfRMaeD", img: "1YUj9LyMGpZ3WQ8m_B3iC3GLO1PfRMaeD" },
+                { t: "Trifoliar informativo general", img: "1gLaf6VrRyZoqzc1dh4qqGQA-HiQiOJrA",img: "1gLaf6VrRyZoqzc1dh4qqGQA-HiQiOJrA"},
+            ] 
+        },
+        { 
+            name: "13.  Programa de Medicina Tradicional y Alternativa", 
+            id: "1cjlQSIikUWidt_DWyZjFpHADvZiypYr0", 
+            docs: [
+                { t: "Vademécum nacional de plantas medicinales", img: "1nnh0Q_rxJSq1l7ufr6JPwxO-ZQ8iscKC", pdf: "1nnh0Q_rxJSq1l7ufr6JPwxO-ZQ8iscKC" },
+                { t: "Módulo de atención a la demanda", img: "1m2LO_JUHfJ4T3kLYHDrmwWjnfuFPmG0k", pdf: "1m2LO_JUHfJ4T3kLYHDrmwWjnfuFPmG0k" },
+                { t: "Tratamiento natural COVID-19 (1ra Edición)", img: "1jQ5XaFLPuAkbYoAlIseLKH-mffSXwgZa", pdf: "1jQ5XaFLPuAkbYoAlIseLKH-mffSXwgZa" },
+                { t: "Tratamiento natural COVID-19 (2da Edición)", img: "1HheYbkQ3_1B9MaEG3DBG-WKNVf0lPqgC", pdf: "1HheYbkQ3_1B9MaEG3DBG-WKNVf0lPqgC" },
+                { t: "Formulaciones naturales ante el COVID-19", img: "1CyS9myspa2HlnFQcolwIEJV1phffgDgQ", pdf: "1CyS9myspa2HlnFQcolwIEJV1phffgDgQ" }
+            ] 
+        },
+        { 
+            name: "14.  Programa Nacional de Salud Reproductiva", 
+            id: "1J7EwvH_tL5fDXu0jg8o0WQOkzhIua9db", 
+            docs: [
+                { t: "Directorio red paternidad y maternidad", img: "1X8bM8JGSgj7LUTGJ6iFRj9_cxdJAkMtl", pdf: "1X8bM8JGSgj7LUTGJ6iFRj9_cxdJAkMtl" },
+                { t: "Guía de atención Integral pra la prevención atención y tratamiento de lesiones precursoras del cáncer uterino", img: "1GnWtG4fV7uelBcF_58_rEiXsom_4f7c1", pdf: "1GnWtG4fV7uelBcF_58_rEiXsom_4f7c1" },
+                { t: "Guía de uso de misoprostol en el posparto domiciliar asistido por comadrona ", img: "1WvgNFbz-8rEVTHRvcv4wGPySsH-Co54f", pdf: "1WvgNFbz-8rEVTHRvcv4wGPySsH-Co54f" },
+                { t: "Informe de país mortalidad materna 2023", img: "1OHuXhprcyjqYrhJXMMCaxu8f5ODdbgF3", pdf: "1Q6pAQy7YXA2PDTYBlot87xEjU3lrH8Ds" },
+                { t: "Situación de la mortalidad materna en Guatemala 2020-2021", img: "14sQrXGNlYRh9eXm-BqyQdeghAoJ5Q3-h", pdf: "19DRKNQe3cp2BiFYV7Vw6r2navwgVALXp" },
+                { t: "Informe de país mortalidad materna Guatemala 2022", img: "1vGrhXwK7PUC4RW-P3HIcqcaUn8JkcMfz", pdf: "1d9k44dmg5MuRwfZklh7WmGMWhHlv6mVP" },
+                { t: "Plan nacional para la reducciónde muerte materna y neonatal 2015-2020", img: "1soU9gtT5DuHVT1WHiRPKAT8y4zvZY9sh", pdf: "1GnWtG4fV7uelBcF_58_rEiXsom_4f7c1" },
+                { t: "Manual de código rojo para el manejo de la hemorragia obstétrica ", img: "1W5SwMovy7eHIgdS2kb32mqtQk4a4IPQ5", pdf: "18yCw0Or5nI_TJ8V7yWI0IT2fxuQ1zXjg" },
+                { t: "Manual para la prevención,diagnóstico y tratamiento de la sépsis obtétrica", img: "1QAAQK-PcDV6hoFfKODymqqDklbUFR9n5", pdf: "12HUBgemV5YYdxN8FPVRES-aFC2fK5l_E" },
+                { t: "Manual para el manejo de los trastornos hipertensivos en el embarazo", img: "1jLVM3vRgECWm1gQT4YkPfYQuRIOXFsoy", pdf: "1wl2Af5noW8MoVCPLWvFd6ExPLiVhVRsr" },
+                { t: "Protocolo de tamizaje neonatal", img: "1j3HVMVcwvRRYzyR4Wr7bb6xGK3fi0VPs", pdf: "1NQPpZtTudfN2-47QhLoPD5ZIhaduzke7" },
+                { t: "Guía para la atención integral de la retinopatia del prematuro MSPAS 2018 ", img: "13-i07kRfoRhTc4Gp382XlH8joroqAvQi", pdf: "1ImA4XOx8xpbm-fb9631UOXuBvCjYJ6WY" },
+                { t: "Campaña permanente paternidad y maternidad responsable ", img: "1kGSVe2yLhqvLua6S8Ky5AH3wI-1nmmw5", pdf: "1nWwFFcOhL31T6ADKI1pgT6RHiuCkAkth" },
+                { t: "Qué es la red nacional de paternidad y maternidad responsable ", img: "1mzvk_OGbcBi5ovpFOx6wg0lXYyNqsCZa", pdf: "1sQa_v4c_cZqdQ1y1DH9DWKP54tah16jW" },
+                { t: "Guía de prevencion de Infecciones de Transmisión Sexual ", img: "1VgRxsMIktaGs6pgQCoZzTG-fg2WD_GQc", pdf: "1l2e11j2qBctjXNvXEBIn6BOy_JzQsUde" },
+                { t: "Manual de implementación y funcionamiento de las casas maternas", img: "1ppP88zLrjuZsS7Lq9rcIol4tb8DSJCXi", pdf: "1UMavmtdkavMP9ftIQT_ZHt8WGkD9t8UE" },
+                { t: "Manual para el monitoreo y evaluación de la calidad de los procesos en atención materna y neonatal en los servicios de salud", img: "1_hXu1_wjtVBDVjBE0_Qy4rJEw7UQ0etR", pdf: "1Ca00f9NUjnBqU2h6vCXSxW7zNbmfG5L8" },
+                { t: "Manual de cinco pasos para la organización de comisiones de salud", img: "1TYOR5k4vexN7IHcPifFwog7NoUfv5i-H", pdf: "1TYOR5k4vexN7IHcPifFwog7NoUfv5i-H" },
+                { t: "Plan de prevención de embarazos en adolescentes", img: "19lZdTXJ_IQfW_UECqxzAejPPdfwvlKoI", pdf: "1HyS9zouU_lqigF7STTHoyfmhvPnxDetA" },
+                { t: "Guía para la implementación y funcionamiento de espacios amigables", img: "1ynJ-Bv_b9AKM33f1yWlb9ALaw6lgoAwK", pdf: "1TwuBoyJu6fQvPH09Ag_ixb7g1Prsbt8T" },
+                { t: "Lineamiento técnicos para la emisión y uso del carnet de comadronas", img: "1NuusS7DhpfW8WkEQzdUhkOsNM-CfqUmI", pdf: "1-grk_wo3eGq75hlAo4H4bY6OEJk5Kw67" },
+                { t: "Planea prevención del embarazo en adolescente", img: "1IeXsPgs1TdC7CGGTtgIUZm2EpaZfTeWW", pdf: "1TtW6lhwZI5Q79rHGMR3C6eATfFCk6cQw" },
+                { t: "Más que una sanadora Manual práctico de comadronas para una maternidad sana ASECSA", img: "1oFFTENfqNszDJUDw_Ba7_wPY5iLs1mJS", pdf: "1oFFTENfqNszDJUDw_Ba7_wPY5iLs1mJS" },
+                { t: "Manual para capacitar comadronas en atención materno neonatal", img: "1LD4n3yjcW7818wYYeBhd4K2cFUaHJ_5B", pdf: "1PjOMFyAGdZ4pc0sJh5kNSFj8DSzEBdWk" }
+            ] 
+        },      
+        { 
+            name: "15.  Programa Nacional de Prevención y Control de ITS, VIH y Sida ", 
+            id: "1x_XSrz9LgyX9_TytwLPCk-myCYEcBv6R", 
+            docs: [
+                { t: "Estrategia nacional de sostenibilidad VIH", img: "1c9RFJ0sJR3Z5doIqcPWUf0vANdSBylZF", pdf: "1c9RFJ0sJR3Z5doIqcPWUf0vANdSBylZF" },
+                { t: "Guía de atención integral de hepatitis", img: "10d7Tpt6LWqJL6pJLHHP0BIv8vxdRXnS1", pdf: "10d7Tpt6LWqJL6pJLHHP0BIv8vxdRXnS1" },
+                { t: "Plan nacional para la eliminaciónde la transmisión materno infantil de VIH,sífilis y hepatitis B 2021-2024", img: "1sEAGvBSsNGJtRcQ7eqg-9DK8B5Op2id1", pdf: "1sEAGvBSsNGJtRcQ7eqg-9DK8B5Op2id1" },
+                { t: "Lineamientos de atención integral en salud para personas trans", img: "10UPOEm_6CwUMlLwMVzgHcxCR1e_RovXl", pdf: "1xfO5zYOFlIKen24yy_i6fbsfT6DYcrIC" },
+                { t: "Trilogía de leyes", img: "1Fwn3Ee2i_MP-wEbOaNHfXL2mhDf5f6cs", pdf: "17bAr3E_RY69S5eKlche9MDu9SWJy3FQm" },
+                { t: "Guía de profilaxis pre exposición (PrEp)", img: "1ckJ8LUiPecW-262fL5_XMUlfkkQ2-tZp", pdf: "1ckJ8LUiPecW-262fL5_XMUlfkkQ2-tZp" },
+                { t: "Medición del gasto en Sida -MEGAS-2019 y 2020 ", img: "1VHOiR_zQX3k3w6NfOp9mmEHbaIKCmvWI", pdf: "17vAFxFAYnIXmYBSIu6N7I14AkBOotNjQ" },
+                { t: "Manual de lineamientos de atención integral en salud para lesbianas, gais y bisexuales", img: "12JWCNTl6dX1bUgl0L1KHxflkSIlFt4As", pdf: "1tl2jMCFMUibJFX5XgY4IDcGOVuA5oiik" },
+                { t: "Manualde orientación y realización de pruebas para VIH,Sífilis,HepatitisB VHB-y HepatitisC VHC-", img: "1w3ZW6N51kNzbqjaLSAaTBcWqJ6cO1ETn", pdf: "1SarMYJs25wiDysY5Q9dyMG_FX-7nKkMq" },
+                { t: "Uso de antirretrovirales en VIH", img: "1gwR2cWf9MXSZlsxkT8Z7kOmqjko5O5IU", pdf: "1gwR2cWf9MXSZlsxkT8Z7kOmqjko5O5IU" }
+            ] 
+        },        
+        { 
+            name: "16. Programa de Tuberculosis", 
+            id: "1euULX1nu2FLLKQhpGOSFEQ-CNwyu3vwk", 
+            docs: [
+                { t: "Manual bacteriológico de tuberculosis", img: "1mZreUeJGiYt3CN8R0fvPc00fjlhumqXa", pdf: "1mZreUeJGiYt3CN8R0fvPc00fjlhumqXa" },
+                { t: "Guía de control de infecciones", img: "1bwej7b-BJXJlv9N7BLiUKOsMiRj_s3yC", pdf: "19aGkIoba1_XU3adBBZ-D2M4ME4tnxGhZ" },
+                { t: "Manual de monitoreo plan estratégico nacional", img: "1PnSVIpjCe5XN9q5HP94QfPVeYD1sl6dW", pdf: "1N3lG11KiRUph7Lq6YAW3yfqEf8GQI50F" },
+            ] 
+            
+        },
+        { 
+            name: "17. Programa de Inmunizaciones", 
+            id: "1J_SKzsFedUNQXbUDavSMCrsR-aAMZ8j4", 
+            docs: [
+                { t: "Introducción de la vacuna hexavalente", img: "1N2ARLxBX-0ZTxnnxX8Hk_l22ds1VLfxV", pdf: "1N2ARLxBX-0ZTxnnxX8Hk_l22ds1VLfxV" },
+                { t: "Lineamientos varicela 2025", img: "1PxjecPC1sLDQNkMUb8rfBUZO5_6-pGUL", pdf: "1PxjecPC1sLDQNkMUb8rfBUZO5_6-pGUL" },
+                { t: "Carnet de vacunación niño", img: "1zxk9aBOW7Eq3kOw2Nkte6g4Aiymi_LQ7", pdf: "1gR3W9taqwmcoGF80n6mPRseO4An4YcKs" },
+                { t: "Carnet de vacunación niña", img: "1LwaJ-uxtthIwZFe98IR7JCv1vIsZ7aAy", pdf: "1vwdvrgyyj0OTLFt3VtUFCkHL47AiYBWu" }
+            ] 
+        },      
+        { 
+            name: "18.  Programa Nacional para la Prevención de Enfermedades Crónicas no Transmisibles y Cáncer", 
+            id: "1aEQmCAynB564qLL84es0dUS80nuQVRQe", 
+            docs: [
+                { t: "Módulo de atención a la demanda", img: "1qWXrE1Bv1eieyxBws_WMEyBMLGXRprCU", pdf: "1qWXrE1Bv1eieyxBws_WMEyBMLGXRprCU" }
+            ] 
+        },
+        { 
+            name: "19.Programa de Enfermedades Transmitidas por Vectores", 
+            id: "11F6406mj9x8F2Mtf7-mDl-rRp2H24sP0", 
+            docs: [
+                { t: "Manual para la vigilancia y control de triatoma dimidiata vector de la enfermedad de (Chagas)", img: "1guM_jTRvQdEnpxuEZGUsrIA561TPUmd6", pdf: "1guM_jTRvQdEnpxuEZGUsrIA561TPUmd6" },
+                { t: "Manual de plaguicidas", img: "1TZlKfHhZiBCwz3aCRilIQ-KWMHL2zNsJ", pdf: "1TZlKfHhZiBCwz3aCRilIQ-KWMHL2zNsJ" },
+                { t: "Manual para vigilancia, prevención y control de las leishmaniasis", img: "17_GTvfKC_OlvIoySJ9RefbDIEEO11GfG", pdf: "1jblFs1RE5BbH8cm4OFEy7KlmhMZ_Ki49" },
+                { t: "Manejo integrado de vectores", img: "1-Nxy83p3zIfQmM8pBfLE0YkkkSJtr_hm", pdf: "10tSwNtFTaQodtyRh-wKMmkNXYj1Mc1P1" },
+                { t: "Manejo de vectores con énfasis en arbovirosis", img: "14LzsG6ViF8qwu01VPc90xawbfFUB1MeY", pdf: "1Zf9szHacGxLA2cBHJPB8Rn9jIjbXwJkI" },
+                { t: "Guía para el manejo de dengue y chinkunguya", img: "1P_y2XPwkhVadFN-IFTkwkp8L3s7cfpLK", pdf: "18k8ZE9-n2i_SqIMIn_HMVy-o0v_5rhYN" },
+                { t: "Vigilancia y control de la malaria", img: "1SL4OnoisWUoxsxoE9V7-S7lkmXEfrjC0", pdf: "1qiWUxnfz8g7HFAZKR_avbJXeXhEfY0sZ" }
+            ] 
+        },        
+        { name: "20. Programa de Salud Renal", id: "1aaTIfZCEUg_VsNGWRKldc6Sk-IsGNJ3o", docs: [] },
+        { name: "21.  Programa de Prevención y Control de Infecciones", id: "19AdzpPH7a5Q7OhRFjkTetNAYwktUqRH_", docs: [] },
+        { name: "22.  Programa de Salud Escolar", id: "1g3i2PO8NTltgA07yq2fFaHZTAJZG80n-", docs: [] },
+        { name: "23.   Programa de Zoonosis", id: "1SNV8FOtwMw4xcR01GsKC-kwhO1DLKmrs", docs: [] }
+    ];
+
+    // Detecta iOS y abre el documento correctamente
+    function abrirDoc(e, id) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        if (isIOS) {
+            e.preventDefault();
+            // En iOS abrimos la vista de preview que sí funciona en Safari
+            window.location.href = `https://drive.google.com/file/d/${id}/preview`;
+        }
+        // En otros dispositivos deja que el href normal funcione
+    }
+
+    function renderCards() {
+        const grid = document.getElementById('programGrid');
+        grid.innerHTML = "";
+        data.forEach((p, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => openModal(index);
+            const thumb = p.id ? `https://drive.google.com/thumbnail?id=${p.id}&sz=w500` : 'https://via.placeholder.com/300x300?text=MSPAS';
+            card.innerHTML = `<div class="icon-wrapper"><img src="${thumb}"></div><h3>${p.name}</h3><div class="btn-view">Ver Documentos</div>`;
+            grid.appendChild(card);
+        });
+    }
+
+    function filterPrograms() {
+        const searchInput = document.getElementById('searchInput');
+        const term = searchInput.value
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+        
+        const grid = document.getElementById('programGrid');
+        grid.innerHTML = "";
+
+        if (term === "") {
+            renderCards();
+            return;
+        }
+
+        data.forEach((p, index) => {
+            const nombreProg = p.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const matchPrograma = nombreProg.includes(term);
+            
+            const temasCoincidentes = p.docs.filter(doc => {
+                const temaDoc = doc.t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return temaDoc.includes(term);
+            });
+
+            if (matchPrograma || temasCoincidentes.length > 0) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openModal(index);
+                
+                const thumb = p.id ? `https://drive.google.com/thumbnail?id=${p.id}&sz=w500` : 'https://via.placeholder.com/300x300?text=MSPAS';
+                
+                let etiquetaExtra = "";
+                if (!matchPrograma && temasCoincidentes.length > 0) {
+                    etiquetaExtra = `
+                        <div style="font-size:11px; color:#4eb4e1; font-weight:bold; margin-top:5px; background:#e1f5fe; border-radius:15px; padding:2px 10px; display:inline-block;">
+                            <i class="fas fa-file-pdf"></i> Tema encontrado
+                        </div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="icon-wrapper"><img src="${thumb}"></div>
+                    <h3>${p.name}</h3>
+                    ${etiquetaExtra}
+                    <div class="btn-view">Ver Documentos</div>
+                `;
+                grid.appendChild(card);
+            }
+        });
+
+        if (grid.innerHTML === "") {
+            grid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align:center; padding:60px; color:#999;">
+                    <i class="fas fa-search-minus" style="font-size:50px; margin-bottom:15px; opacity:0.3;"></i>
+                    <p style="font-size:18px;">No encontramos programas o documentos relacionados.</p>
+                </div>`;
+        }
+    }
+
+    function openModal(idx) {
+        const p = data[idx];
+        document.getElementById('modalTitle').innerText = p.name;
+        const container = document.getElementById('landingContent');
+        
+        // Limpiamos el contenedor y verificamos si hay documentos
+        container.innerHTML = p.docs.length > 0 ? "" : "<p style='grid-column: 1/-1; text-align:center; padding: 20px;'>Próximamente archivos disponibles.</p>";
+        
+        p.docs.forEach(doc => {
+            const docThumb = doc.img && doc.img !== "ID_IMAGEN" 
+                ? `https://drive.google.com/thumbnail?id=${doc.img}&sz=w500` 
+                : 'https://via.placeholder.com/200x300?text=PDF';
+
+            container.innerHTML += `
+                <div class="doc-item">
+                    <div class="doc-cover-box"><img src="${docThumb}"></div>
+                    <div class="doc-title">${doc.t}</div>
+                    <a href="https://drive.google.com/file/d/${doc.pdf}/preview" target="_blank" onclick="abrirDoc(event, '${doc.pdf}')" class="btn-pdf">VER DOCUMENTO</a>
+                </div>`;
+        });
+
+        // BOTÓN DE REGRESO AL MENÚ (Se añade al final de la lista de documentos)
+        container.innerHTML += `
+            <div style="grid-column: 1/-1; text-align:center; padding: 40px 0;">
+                <button onclick="closeModal()" style="background:var(--primary); color:white; border:none; padding:15px 40px; border-radius:30px; cursor:pointer; font-weight:bold; font-size:16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); display: inline-flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-arrow-left"></i> REGRESAR AL MENÚ PRINCIPAL
+                </button>
+            </div>`;
+
+        document.getElementById('myModal').style.display = "block";
+        document.body.style.overflow = "hidden"; // Evita que la página de fondo se mueva
+    }
+
+    function closeModal() {
+        document.getElementById('myModal').style.display = "none";
+        document.body.style.overflow = "auto"; // Devuelve el scroll a la página principal
+    }
+
+    // Cerrar el modal si el usuario hace clic fuera de la caja blanca
+    window.onclick = function(event) {
+        const modal = document.getElementById('myModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Inicializar la carga de tarjetas al abrir la página
+    renderCards();
+</script>
+
+<button onclick="window.scrollTo({top: 0, behavior: 'smooth'}); document.getElementById('searchInput').value=''; renderCards();" 
+        style="position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--accent); color: white; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center;">
+    <i class="fas fa-home" style="font-size: 20px;"></i>
+</button>
+
+</body>
+</html>
